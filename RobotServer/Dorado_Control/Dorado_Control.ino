@@ -16,7 +16,7 @@ int motorSpeed = maxPWM; //variabila de tip integer în care se memoriază vitez
 int debug = 0; //variabila de tip integer în care activeayă funcţiile de debug
 int turningSpeed= 200; //variabila de tip integer în care se memoriază viteya motoarelor pentru rotiriile spre dreapta si stânga
 int serialEventDone = 0; //variabila de tip integer în care se memoriază dacă s-a recepţionat cevpe serial
-int maxSpeed = maxPWM; // ???
+int maxSpeed = minPWM; // ???
 int desiredAngle = 0;
 
 void setup()
