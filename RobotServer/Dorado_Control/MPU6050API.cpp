@@ -25,7 +25,7 @@ MPU6050 mpu;
    digital I/O pin 2.
  * ========================================================================= */
 
-// #define DEBUG // Uncomment to enable prints
+//#define DEBUG // Uncomment to enable prints
 
 // uncomment "OUTPUT_READABLE_EULER" if you want to see Euler angles
 // (in degrees) calculated from the quaternions coming from the FIFO.
@@ -33,7 +33,7 @@ MPU6050 mpu;
 // http://en.wikipedia.org/wiki/Gimbal_lock)
 #define OUTPUT_READABLE_EULER
 
-#define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
+#define INTERRUPT_PIN 10  // use pin 2 on Arduino Uno & most boards
 #define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 bool blinkState = true;
 
