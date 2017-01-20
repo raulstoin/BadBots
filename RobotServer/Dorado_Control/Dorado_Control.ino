@@ -10,15 +10,19 @@
 #define motorForward LOW //valoarea logică a pinului de direcţie ca motorul să se rotească înainte
 #define motorBackward HIGH //valoarea logică a pinului de direcţie ca motorul să se rotească înapoi
 
+#define START_DELAY 5 // in seconds
+
+int precision = 2;
 int incomingData = 0; //variabila de tip integer în care se memoriază caracterul recepţionat pe Bluetooth
-int incomingAngle = 0;
+byte incomingAngle = 0;
 int motorSpeed = maxPWM; //variabila de tip integer în care se memoriază viteza actuală a motoarelor, starea iniţială este 255.
 int debug = 0; //variabila de tip integer în care activeayă funcţiile de debug
 int turningSpeed= 200; //variabila de tip integer în care se memoriază viteya motoarelor pentru rotiriile spre dreapta si stânga
 int serialEventDone = 0; //variabila de tip integer în care se memoriază dacă s-a recepţionat cevpe serial
 int maxSpeed = minPWM; // ???
 int desiredAngle = 0;
-
+int turnFlag = 0;
+int printMe;
 void setup()
 {
   pinMode(lSpeed, OUTPUT); //definirea pinului lSpeed ca iesire
@@ -28,23 +32,31 @@ void setup()
   pinMode(rDir, OUTPUT); //definirea pinului rDir ca iesire
   analogWrite(rSpeed, 255); //setarea PWM-ului la valoarea de 255 pentru rSpeed
   Serial.begin(115200); //pornirea comunicării pe serial
-
   if(debug)
   {
     Serial.println("Serial Running.");
   };
   setupMPU6050();
+  delay(1000 * START_DELAY);
 }
 
 void serialEvent()
 {
   if(Serial.available()>0)
   {
-    incomingData = Serial.read(); //citirea datelor recepţionate pe serial
-    if(incomingData == 'l' || incomingData == 'r')
+    if(turnFlag == 0) {
+      incomingData = Serial.read(); //citirea datelor recepţionate pe serial
+      if(incomingData == 'l' || incomingData == 'r')
+        turnFlag = 1;
+      else
+        serialEventDone = 1;
+    }
+    else {
       incomingAngle = Serial.read();
+      turnFlag = 0;
+      serialEventDone = 1;      
+    }
   }
-  serialEventDone = 1;
 }
 
 void loop()
@@ -73,7 +85,8 @@ void loop()
       motorDrive(3);  //start turing left
       if(debug)
       {
-        Serial.println("received l") ;
+        Serial.print("received l with angle ") ;
+        Serial.println(incomingAngle);
       };
       break;
 
@@ -81,7 +94,8 @@ void loop()
       motorDrive(4);  //start turning right
       if(debug)
       {
-        Serial.println("received r") ;
+        Serial.print("received r with angle ") ;
+        Serial.println(incomingAngle);
       };
       break;
 
@@ -151,9 +165,19 @@ void motorDrive(int mode)
     analogWrite(rSpeed, motorSpeed);
     // wait until we've rotated to the desired angle
     desiredAngle = currentAngleMPU6050() - incomingAngle;
-    while(currentAngleMPU6050() > (desiredAngle + 5) 
-      && currentAngleMPU6050() < (desiredAngle - 5)) {
-      // Do nothing
+    if(desiredAngle < -180)
+      desiredAngle = 180 - (desiredAngle + 180);
+    if(desiredAngle > 180)
+      desiredAngle = -180 + (desiredAngle - 180); 
+    while( !(currentAngleMPU6050() > (desiredAngle - precision) 
+      && currentAngleMPU6050() < (desiredAngle + precision))) {
+      loopMPU6050();
+      if(debug) {
+        Serial.print("Desired angle: ");
+        Serial.print(desiredAngle);
+        Serial.print(" current angle: ");
+        Serial.println(currentAngleMPU6050());
+      }
     }
     brake();
 
@@ -166,11 +190,21 @@ void motorDrive(int mode)
     analogWrite(lSpeed, motorSpeed);
     analogWrite(rSpeed, motorSpeed);
 
-    // wait until we've rotated to the desired angle
+    // wait until we've rotated to the desired angle    
     desiredAngle = currentAngleMPU6050() + incomingAngle;
-    while(currentAngleMPU6050() > (desiredAngle + 5) 
-      && currentAngleMPU6050() < (desiredAngle - 5)) {
-      // Do nothing
+    if(desiredAngle < -180)
+      desiredAngle = 180 - (desiredAngle + 180);
+    if(desiredAngle > 180)
+      desiredAngle = -180 + (desiredAngle - 180); 
+    while( !(currentAngleMPU6050() > (desiredAngle - precision) 
+      && currentAngleMPU6050() < (desiredAngle + precision))) {
+      loopMPU6050();
+      if(debug) {
+        Serial.print("Desired angle: ");
+        Serial.print(desiredAngle);
+        Serial.print(" current angle: ");
+        Serial.println(currentAngleMPU6050());
+      }
     }
     brake();
 

@@ -1,0 +1,2 @@
+sudo /home/mario/arduino-1.8.1/hardware/tools/avr/bin/avrdude -C/home/mario/arduino-1.8.1/hardware/tools/avr/etc/avrdude.conf -c usbasp -p m644p  -P /dev/ttyUSB0 -B 0.5  -U flash:w:/tmp/arduino_build_353425/Dorado_Control.ino.hex:i 
+
